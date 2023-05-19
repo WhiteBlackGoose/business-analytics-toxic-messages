@@ -23,6 +23,7 @@ def remove_shorts(text):
         .replace("'re", "")\
         .replace("'d", "")\
         .replace("'ve", "")\
+        .replace("'ll", "")\
         .replace("n't", " not")
 
 def remove_stopwords(stopwords, words):
@@ -67,6 +68,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 sns.histplot(train['target'][:2000])
 plt.savefig('/tmp/aaa.png')
+
 # P(T | C) != P(!T | C)
 #
 #       T           !T
@@ -94,15 +96,20 @@ for word in s:
     nt, t = s[word]
     if ' ' in word:
         if nt + t < 10:
-            continue        
+            continue
     else:
         if nt + t < 25:
-            continue        
+            continue
     value = (nt / NT - t / T) / (nt + t) * (NT + T)
     sig[word] = value
-    sig_list.append((word, value))
+    sig_list.append((word, value, nt, t))
 
 len(sig_list_sorted)
 sig_list_sorted = sorted(sig_list, key=lambda x: -abs(x[1]))
 
 sorted(sig_list, key=lambda x: -x[1])
+
+1.044604617152408 / (NT + T)
+
+nt, t = 0, 5
+(nt / NT - t / T) / (nt + t) * (NT + T)
