@@ -32,13 +32,16 @@ def remove_stopwords(stopwords, words):
             wordsFiltered.append(w)
     return wordsFiltered
 
-def proc(stopwords, text):
+def proc(stopwords, text, n):
     text = text.lower()
     text = remove_punct(text)
     text = remove_shorts(text)
     text = word_tokenize(text)
     text = remove_stopwords(stopwords, text)
-    return text
+    ngrams = []
+    for w in range(len(text) - n + 1):
+        ngrams.append(" ".join(text[w:w+n]))
+    return ngrams
 
 # nltk.download('punkt')
 # nltk.download('stopwords')
@@ -56,7 +59,7 @@ from tqdm import tqdm
 
 all_words = set()
 for text in tqdm(train['comment_text']):
-    all_words = all_words.union(proc(stopwords, text))
+    all_words = all_words.union(proc(stopwords, text, 2))
 
 len(all_words)
 import seaborn as sns
@@ -81,7 +84,7 @@ for word in all_words:
     s[word] = [0, 0]
 
 for text, tox in tqdm(zip(train['comment_text'], train['toxic'])):
-    words = proc(stopwords, text)
+    words = proc(stopwords, text, 2)
     for word in words:
         s[word][tox] += 1
 
@@ -91,9 +94,11 @@ T = sum(train['toxic'])
 sig_list = []
 for word in s:
     nt, t = s[word]
-    if nt + t < 5:
+    if nt + t < 30:
         continue        
-    sig[word] = abs(nt / NT - t / T)
-    sig_list.append((word, abs(nt / NT - t / T)))
+    value = (nt / NT - t / T) / (nt + t) * (NT + T)
+    sig[word] = value
+    sig_list.append((word, value))
 
-sig_list_sorted = sorted(sig_list, key=lambda x: -x[1])
+len(sig_list_sorted)
+sig_list_sorted = sorted(sig_list, key=lambda x: -abs(x[1]))
