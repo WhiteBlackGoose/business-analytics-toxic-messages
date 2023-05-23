@@ -45,8 +45,8 @@ def proc(stopwords, text, ns):
             ngrams.append(" ".join(text[w:w+n]))
     return ngrams
 
-# nltk.download('punkt')
-# nltk.download('stopwords')
+#nltk.download('punkt')
+#nltk.download('stopwords')
 stopWords = set(stopwords.words('english'))
 
 ex = (train['comment_text'][0]).lower()
@@ -67,7 +67,7 @@ len(all_words)
 import seaborn as sns
 import matplotlib.pyplot as plt
 sns.histplot(train['target'][:2000])
-plt.savefig('/tmp/aaa.png')
+plt.savefig('tmp/aaa.png')
 
 # P(T | C) != P(!T | C)
 #
@@ -88,9 +88,18 @@ for text, tox in tqdm(zip(train['comment_text'], train['toxic'])):
             s[word] = [0, 0]
         s[word][tox] += 1
 
-sig = dict()
 NT = train.shape[0] - sum(train['toxic'])
 T = sum(train['toxic'])
+
+def cond_prob_tox(word):
+    #P(M is toxic | word in M) = P(word in M | M is toxic) * P(M is toxic) / P(word in M)
+    p_word_in_M = sum(s[word])/(T + NT)
+    p_M_toxic = T/(NT + T)
+    p_in_M_given_toxic = s[word][1]/T
+    return p_in_M_given_toxic * p_M_toxic / p_word_in_M
+
+
+sig = dict()
 sig_list = []
 for word in s:
     nt, t = s[word]
@@ -104,7 +113,9 @@ for word in s:
     sig[word] = value
     sig_list.append((word, value, nt, t))
 
-len(sig_list_sorted)
+
+
+len(sig_list_sorted[:10])
 sig_list_sorted = sorted(sig_list, key=lambda x: -abs(x[1]))
 
 sorted(sig_list, key=lambda x: -x[1])
