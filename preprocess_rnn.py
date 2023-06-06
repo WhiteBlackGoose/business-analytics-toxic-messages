@@ -27,6 +27,9 @@ f.close()
   
 ## To execute the training process
   
+optimizer = tf.keras.optimizers.Adam()
+loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none')
+
 EPOCHS = 100
 
 for epoch in range(EPOCHS):

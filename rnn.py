@@ -1,3 +1,6 @@
+import tensorflow as tf
+from tensorflow.keras import layers
+from tensorflow import keras
 # https://towardsdatascience.com/sequence-to-sequence-models-from-rnn-to-transformers-e24097069639
 
 class Encoder(tf.keras.Model):
@@ -56,9 +59,6 @@ class Decoder(tf.keras.Model):
         return x, state
 
 
-optimizer = tf.keras.optimizers.Adam()
-loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none')
-
 def loss_function(real, pred):
     mask = tf.math.logical_not(tf.math.equal(real, 0))
     loss_ = loss_object(real, pred)
@@ -70,7 +70,7 @@ def loss_function(real, pred):
 
 
 @tf.function
-def train_step(inp, targ, enc_hidden):
+def train_step(inp, enc_hidden):
     loss = 0
     with tf.GradientTape() as tape:
         enc_output, enc_hidden = encoder(inp, enc_hidden)
