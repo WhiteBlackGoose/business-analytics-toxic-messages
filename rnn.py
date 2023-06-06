@@ -14,14 +14,12 @@ class Encoder(tf.keras.Model):
         super(Encoder, self).__init__()
         self.batch_sz = batch_sz
         self.enc_units = enc_units
-        self.embedding = tf.keras.layers.Embedding(vocab_size, embedding_dim)
         self.gru = tf.keras.layers.GRU(self.enc_units,
                                    return_sequences=True,
                                    return_state=True,
                                    recurrent_initializer='glorot_uniform')
 
     def call(self, x, hidden):
-        x = self.embedding(x)
         output, state = self.gru(x, initial_state = hidden)
         return output, state
 
@@ -33,7 +31,6 @@ class Decoder(tf.keras.Model):
         super(Decoder, self).__init__()
         self.batch_sz = batch_sz
         self.dec_units = dec_units
-        self.embedding = tf.keras.layers.Embedding(vocab_size, embedding_dim)
         self.gru = tf.keras.layers.GRU(self.dec_units,
                                    return_sequences=True,
                                    return_state=True,
@@ -44,9 +41,6 @@ class Decoder(tf.keras.Model):
     def call(self, x, hidden, enc_output):
         # as we have specified return_sequences=True in encoder gru
         # enc_output shape == (batch_size, max_length, hidden_size)
-
-        # x shape after passing through embedding == (batch_size, 1, embedding_dim)
-        x = self.embedding(x)
 
         output, state = self.gru(x, initial_state = hidden)
 
@@ -73,17 +67,11 @@ def loss_function(real, pred):
 def train_step(tweet, encoder, decoder, enc_hidden):
     loss = 0
     with tf.GradientTape() as tape:
-        enc_output, enc_hidden = encoder(tweet, enc_hidden)
         dec_hidden = enc_hidden
-        #initial decoder input - SOS token
-        dec_input = tf.expand_dims([targ_lang.word_index['<start>']] * BATCH_SIZE, 1)
-        
-        # Teacher forcing - feeding the target as the next input
         for word in tweet:
-            predictions, dec_hidden = decoder(dec_input, dec_hidden, enc_output)
-            loss += loss_function(targ[:, t], predictions)
-            # using teacher forcing - decoder input for next time step is the target of the current time step
-            dec_input = tf.expand_dims(targ[:, t], 1)
+            enc_output, enc_hidden = encoder(tweet, enc_hidden)
+            dec_output, _ = decoder(, dec_hidden, enc_output)
+            loss += loss_function(enc_output, dec_output)
             
     batch_loss = (loss / int(targ.shape[1]))
 
