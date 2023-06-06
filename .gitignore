@@ -4,3 +4,9 @@ glove.840B.300d.zip
 glove.840B.300d.txt
 identity_individual_annotations.csv
 jigsaw-unintended-bias-in-toxicity-classification.zip
+sample_submission.csv
+test.csv
+test_private_expanded.csv
+test_public_expanded.csv
+toxicity_individual_annotations.csv
+train.csv
