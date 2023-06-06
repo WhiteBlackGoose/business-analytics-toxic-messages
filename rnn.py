@@ -70,7 +70,7 @@ def loss_function(real, pred):
 
 
 @tf.function
-def train_step(inp, enc_hidden):
+def train_step(inp, targ, enc_hidden):
     loss = 0
     with tf.GradientTape() as tape:
         enc_output, enc_hidden = encoder(inp, enc_hidden)

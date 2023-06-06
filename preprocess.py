@@ -17,19 +17,21 @@ def remove_shorts(text):
         .replace("'ll", "")\
         .replace("n't", " not")
 
-def remove_stopwords(stopwords, words):
+stopwords = set(stopwords.words("english"))
+
+def remove_stopwords(words):
     wordsFiltered = []
     for w in words:
-        if w not in stopWords:
+        if w not in stopwords:
             wordsFiltered.append(w)
     return wordsFiltered
 
-def proc(stopwords, text, ns):
+def proc(text, ns):
     text = text.lower()
     text = remove_punct(text)
     text = remove_shorts(text)
     text = word_tokenize(text)
-    text = remove_stopwords(stopwords, text)
+    text = remove_stopwords(text)
     ngrams = []
     for n in ns:
         for w in range(len(text) - n + 1):

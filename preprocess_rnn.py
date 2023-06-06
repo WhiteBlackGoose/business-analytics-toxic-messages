@@ -1,10 +1,13 @@
 import pandas as pd
-from preprocess import proc
+import preprocess
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 from tqdm import tqdm
+import nltk
+# from importlib import reload
+# reload(preprocess)
 
 # READ TWEETS
 pd.set_option('display.max_columns', None)
@@ -24,7 +27,14 @@ for i in tqdm(range(100000)):
 f.close()
 
 # TOKENIZE
-  
+vecs = []
+for tox, text in tqdm(zip(train['toxic'], train['comment_text'])):
+    vec = []
+    for word in preprocess.proc(text, [1]):
+        if word in w2v_dict:
+            vec.append(w2v_dict[word])
+    vecs.append((tox, vec))
+
 ## To execute the training process
   
 optimizer = tf.keras.optimizers.Adam()
