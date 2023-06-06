@@ -24,16 +24,29 @@ for i in tqdm(range(100000)):
 f.close()
 
 # TOKENIZE
+  
+## To execute the training process
+  
+EPOCHS = 100
 
-model = keras.Sequential()
-# Add an Embedding layer expecting input vocab of size 1000, and
-# output embedding dimension of size 64.
-model.add(layers.Embedding(input_dim=1000, output_dim=64))
+for epoch in range(EPOCHS):
+    start = time.time()
 
-# Add a LSTM layer with 128 internal units.
-model.add(layers.LSTM(128))
+    enc_hidden = encoder.initialize_hidden_state()
+    total_loss = 0
 
-# Add a Dense layer with 10 units.
-model.add(layers.Dense(10))
+    for (batch, (inp, targ)) in enumerate(dataset.take(steps_per_epoch)):
+        batch_loss = train_step(inp, targ, enc_hidden)
+        total_loss += batch_loss
 
-model.summary()
+        if batch % 100 == 0:
+            print('Epoch {} Batch {} Loss {:.4f}'.format(epoch + 1,
+                                                   batch,
+                                                   batch_loss.numpy()))
+    # saving (checkpoint) the model every 2 epochs
+    if (epoch + 1) % 2 == 0:
+        checkpoint.save(file_prefix = checkpoint_prefix)
+
+    print('Epoch {} Loss {:.4f}'.format(epoch + 1,
+                                      total_loss / steps_per_epoch))
+    print('Time taken for 1 epoch {} sec\n'.format(time.time() - start))
