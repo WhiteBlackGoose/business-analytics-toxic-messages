@@ -70,16 +70,16 @@ def loss_function(real, pred):
 
 
 @tf.function
-def train_step(inp, targ, enc_hidden):
+def train_step(tweet, encoder, decoder, enc_hidden):
     loss = 0
     with tf.GradientTape() as tape:
-        enc_output, enc_hidden = encoder(inp, enc_hidden)
+        enc_output, enc_hidden = encoder(tweet, enc_hidden)
         dec_hidden = enc_hidden
         #initial decoder input - SOS token
         dec_input = tf.expand_dims([targ_lang.word_index['<start>']] * BATCH_SIZE, 1)
         
         # Teacher forcing - feeding the target as the next input
-        for t in range(1, targ.shape[1]):
+        for word in tweet:
             predictions, dec_hidden = decoder(dec_input, dec_hidden, enc_output)
             loss += loss_function(targ[:, t], predictions)
             # using teacher forcing - decoder input for next time step is the target of the current time step

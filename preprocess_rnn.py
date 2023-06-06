@@ -40,6 +40,11 @@ for tox, text in tqdm(zip(train['toxic'], train['comment_text'])):
 optimizer = tf.keras.optimizers.Adam()
 loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none')
 
+from rnn import Encoder, Decoder
+BATCH_SIZE = 10
+encoder = Encoder(300, 300, 100, BATCH_SIZE)
+decoder = Decoder(300, 300, 100, BATCH_SIZE)
+
 EPOCHS = 100
 
 for epoch in range(EPOCHS):
@@ -48,13 +53,13 @@ for epoch in range(EPOCHS):
     enc_hidden = encoder.initialize_hidden_state()
     total_loss = 0
 
-    for (batch, (inp, targ)) in enumerate(dataset.take(steps_per_epoch)):
-        batch_loss = train_step(inp, targ, enc_hidden)
+    for (batch_id, (tox, words)) in enumerate(vecs):
+        batch_loss = train_step(words, encoder, decoder, enc_hidden)
         total_loss += batch_loss
 
-        if batch % 100 == 0:
+        if batch_id % 100 == 0:
             print('Epoch {} Batch {} Loss {:.4f}'.format(epoch + 1,
-                                                   batch,
+                                                   batch_id,
                                                    batch_loss.numpy()))
     # saving (checkpoint) the model every 2 epochs
     if (epoch + 1) % 2 == 0:
