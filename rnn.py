@@ -20,8 +20,8 @@ class Encoder(tf.keras.Model):
                                    recurrent_initializer='glorot_uniform')
 
     def call(self, x, hidden):
-        output, state = self.gru(x, initial_state = hidden)
-        return output, state
+        _, state = self.gru(x, initial_state = hidden)
+        return state
 
     def initialize_hidden_state(self):
         return tf.zeros((self.batch_sz, self.enc_units))
@@ -38,11 +38,11 @@ class Decoder(tf.keras.Model):
         self.fc = tf.keras.layers.Dense(vocab_size)
 
 
-    def call(self, x, hidden, enc_output):
+    def call(self, hidden):
         # as we have specified return_sequences=True in encoder gru
         # enc_output shape == (batch_size, max_length, hidden_size)
 
-        output, state = self.gru(x, initial_state = hidden)
+        output, state = self.gru(hidden)
 
         # output shape == (batch_size * 1, hidden_size)
         output = tf.reshape(output, (-1, output.shape[2]))
@@ -69,18 +69,7 @@ def train_step(tweet, encoder, decoder, enc_hidden):
     with tf.GradientTape() as tape:
         dec_hidden = enc_hidden
         for word in tweet:
-            enc_output, enc_hidden = encoder(tweet, enc_hidden)
-            dec_output, _ = decoder(, dec_hidden, enc_output)
+            enc_hidden = encoder(tf.expand_dims(tf.expand_dims(word, axis=1), axis=0), enc_hidden)
+            dec_output, dec_hidden = decoder(dec_hidden)
             loss += loss_function(enc_output, dec_output)
-            
-    batch_loss = (loss / int(targ.shape[1]))
-
-    variables = encoder.trainable_variables + decoder.trainable_variables
-    
-    # calculate gradient with respect to the model's trainable variables
-    # essentially autodiff is happening here
-    gradients = tape.gradient(loss, variables)   
-
-    optimizer.apply_gradients(zip(gradients, variables))
-
-    return batch_loss
+    return loss

@@ -6,6 +6,7 @@ from tensorflow import keras
 from tensorflow.keras import layers
 from tqdm import tqdm
 import nltk
+import time
 # from importlib import reload
 # reload(preprocess)
 
@@ -40,8 +41,10 @@ for tox, text in tqdm(zip(train['toxic'], train['comment_text'])):
 optimizer = tf.keras.optimizers.Adam()
 loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none')
 
-from rnn import Encoder, Decoder
-BATCH_SIZE = 10
+import rnn
+from rnn import Encoder, Decoder, train_step
+reload(rnn)
+BATCH_SIZE = 1
 encoder = Encoder(300, 300, 100, BATCH_SIZE)
 decoder = Decoder(300, 300, 100, BATCH_SIZE)
 
@@ -54,9 +57,11 @@ for epoch in range(EPOCHS):
     total_loss = 0
 
     for (batch_id, (tox, words)) in enumerate(vecs):
-        batch_loss = train_step(words, encoder, decoder, enc_hidden)
-        total_loss += batch_loss
-
+        loss = train_step(words, encoder, decoder, enc_hidden)
+        total_loss += loss
+        variables = encoder.trainable_variables + decoder.trainable_variables
+        gradients = tape.gradient(loss, variables)   
+        optimizer.apply_gradients(zip(gradients, variables))
         if batch_id % 100 == 0:
             print('Epoch {} Batch {} Loss {:.4f}'.format(epoch + 1,
                                                    batch_id,
