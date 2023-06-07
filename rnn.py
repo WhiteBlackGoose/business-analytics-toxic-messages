@@ -1,7 +1,9 @@
 import tensorflow as tf
 from tensorflow.keras import layers
 from tensorflow import keras
+import numpy as np
 # https://towardsdatascience.com/sequence-to-sequence-models-from-rnn-to-transformers-e24097069639
+loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none')
 
 class Encoder(tf.keras.Model):
     def __init__(self, vocab_size, embedding_dim, enc_units, batch_sz):
@@ -20,8 +22,8 @@ class Encoder(tf.keras.Model):
                                    recurrent_initializer='glorot_uniform')
 
     def call(self, x, hidden):
-        _, state = self.gru(x, initial_state = hidden)
-        return state
+        y, hidden_out = self.gru(x, initial_state = hidden)
+        return y, hidden_out
 
     def initialize_hidden_state(self):
         return tf.zeros((self.batch_sz, self.enc_units))
@@ -38,38 +40,41 @@ class Decoder(tf.keras.Model):
         self.fc = tf.keras.layers.Dense(vocab_size)
 
 
-    def call(self, hidden):
+    def call(self, x, hidden):
         # as we have specified return_sequences=True in encoder gru
         # enc_output shape == (batch_size, max_length, hidden_size)
 
-        output, state = self.gru(hidden)
+        output, state = self.gru(x, initial_state = hidden)
 
         # output shape == (batch_size * 1, hidden_size)
-        output = tf.reshape(output, (-1, output.shape[2]))
+        #output = tf.reshape(output, (-1, output.shape[2]))
 
         # output shape == (batch_size, vocab)
-        x = self.fc(output)
+        #x = self.fc(output)
     
-        return x, state
+        return output, state
 
 
-def loss_function(real, pred):
-    mask = tf.math.logical_not(tf.math.equal(real, 0))
-    loss_ = loss_object(real, pred)
-
-    mask = tf.cast(mask, dtype=loss_.dtype)
-    loss_ *= mask
-
-    return tf.reduce_mean(loss_)
+#def loss_function(real, pred):
+#    mse = tf.keras.losses.MeanSquaredError()
+#    return mse(real, pred)
+loss_function = tf.keras.losses.MeanSquaredError()
 
 
 @tf.function
 def train_step(tweet, encoder, decoder, enc_hidden):
-    loss = 0
-    with tf.GradientTape() as tape:
-        dec_hidden = enc_hidden
-        for word in tweet:
-            enc_hidden = encoder(tf.expand_dims(tf.expand_dims(word, axis=1), axis=0), enc_hidden)
-            dec_output, dec_hidden = decoder(dec_hidden)
-            loss += loss_function(enc_output, dec_output)
+    tweet = tf.stack(tweet)
+    tweet = tf.expand_dims(tweet, axis=1)
+    tweet = tf.expand_dims(tweet, axis=3)
+    for word in tweet:
+        out_t, enc_hidden = encoder(word, enc_hidden)
+
+    loss = 0.0
+    dec_input = tf.ones(word.shape)
+    for word in tweet:
+        dec_input, enc_hidden = decoder(dec_input, enc_hidden)
+        dec_input = tf.reshape(dec_input, (100, 300))[0]
+        dec_input = tf.reshape(dec_input, word.shape)
+        
+        loss += loss_function(dec_input, word)
     return loss

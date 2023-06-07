@@ -19,11 +19,11 @@ train['toxic'] = 1 * (train['target'] > 0.5)
 # https://nlp.stanford.edu/projects/glove/
 w2v_dict = dict()
 f = open("./glove.840B.300d.txt", "rt")
-for i in tqdm(range(100000)):
+for i in tqdm(range(3000)):
     line = f.readline()
     els = line.split()
     token = els[0]
-    value = np.array(list(map(float, els[1:])))
+    value = tf.convert_to_tensor(list(map(float, els[1:])), dtype=tf.float32)
     w2v_dict[token] = value
 f.close()
 
@@ -39,11 +39,10 @@ for tox, text in tqdm(zip(train['toxic'], train['comment_text'])):
 ## To execute the training process
   
 optimizer = tf.keras.optimizers.Adam()
-loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none')
 
 import rnn
 from rnn import Encoder, Decoder, train_step
-reload(rnn)
+#reload(rnn)
 BATCH_SIZE = 1
 encoder = Encoder(300, 300, 100, BATCH_SIZE)
 decoder = Decoder(300, 300, 100, BATCH_SIZE)
@@ -55,21 +54,26 @@ for epoch in range(EPOCHS):
 
     enc_hidden = encoder.initialize_hidden_state()
     total_loss = 0
-
-    for (batch_id, (tox, words)) in enumerate(vecs):
-        loss = train_step(words, encoder, decoder, enc_hidden)
-        total_loss += loss
-        variables = encoder.trainable_variables + decoder.trainable_variables
-        gradients = tape.gradient(loss, variables)   
-        optimizer.apply_gradients(zip(gradients, variables))
-        if batch_id % 100 == 0:
-            print('Epoch {} Batch {} Loss {:.4f}'.format(epoch + 1,
-                                                   batch_id,
-                                                   batch_loss.numpy()))
+    
+    variables = encoder.trainable_variables + decoder.trainable_variables
+    thing = tqdm(enumerate(vecs))
+    for (batch_id, (tox, words)) in thing:
+        if not len(words):
+            continue
+        with tf.GradientTape() as tape:
+            loss = train_step(words, encoder, decoder, enc_hidden)
+            
+            gradients = tape.gradient(loss, variables)   
+            optimizer.apply_gradients(zip(gradients, variables))
+            total_loss += loss
+            if batch_id % 1 == 0:
+                thing.set_description('Epoch {} Batch {} Loss {:.4f}'.format(epoch + 1,
+                                                    batch_id,
+                                                    loss.numpy()))
     # saving (checkpoint) the model every 2 epochs
-    if (epoch + 1) % 2 == 0:
-        checkpoint.save(file_prefix = checkpoint_prefix)
+    #if (epoch + 1) % 2 == 0:
+    #    checkpoint.save(file_prefix = checkpoint_prefix)
 
-    print('Epoch {} Loss {:.4f}'.format(epoch + 1,
-                                      total_loss / steps_per_epoch))
-    print('Time taken for 1 epoch {} sec\n'.format(time.time() - start))
+    #print('Epoch {} Loss {:.4f}'.format(epoch + 1,
+    #                                  total_loss / steps_per_epoch))
+    #print('Time taken for 1 epoch {} sec\n'.format(time.time() - start))
