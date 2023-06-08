@@ -19,7 +19,7 @@ train['toxic'] = 1 * (train['target'] > 0.5)
 # https://nlp.stanford.edu/projects/glove/
 w2v_dict = dict()
 f = open("./glove.840B.300d.txt", "rt")
-for i in tqdm(range(3000)):
+for i in tqdm(range(100000)):
     line = f.readline()
     els = line.split()
     token = els[0]
@@ -49,7 +49,7 @@ decoder = Decoder(300, 300, 100, BATCH_SIZE)
 
 EPOCHS = 100
 
-for epoch in range(EPOCHS):
+def train_epoch():
     start = time.time()
 
     enc_hidden = encoder.initialize_hidden_state()
@@ -67,13 +67,18 @@ for epoch in range(EPOCHS):
             optimizer.apply_gradients(zip(gradients, variables))
             total_loss += loss
             if batch_id % 1 == 0:
-                thing.set_description('Epoch {} Batch {} Loss {:.4f}'.format(epoch + 1,
-                                                    batch_id,
-                                                    loss.numpy()))
-    # saving (checkpoint) the model every 2 epochs
-    #if (epoch + 1) % 2 == 0:
-    #    checkpoint.save(file_prefix = checkpoint_prefix)
+                thing.set_description('Batch {} Loss {:.4f}'.format( batch_id, loss.numpy()))
+            if batch_id % 100 == 0:
+                encoder.save_weights("encoder.weights")
 
-    #print('Epoch {} Loss {:.4f}'.format(epoch + 1,
-    #                                  total_loss / steps_per_epoch))
-    #print('Time taken for 1 epoch {} sec\n'.format(time.time() - start))
+encoder.load_weights("./encoder.weights")
+
+def tweet2embed(tweet):
+    tweet = tf.stack(tweet)
+    tweet = tf.expand_dims(tweet, axis=1)
+    tweet = tf.expand_dims(tweet, axis=3)
+    hid = encoder.initialize_hidden_state()
+    for word in tweet:
+        _, hid = encoder(word, hid)
+    return hid
+

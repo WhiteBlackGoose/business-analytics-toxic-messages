@@ -10,3 +10,5 @@ test_private_expanded.csv
 test_public_expanded.csv
 toxicity_individual_annotations.csv
 train.csv
+glove_10k_300d.txt.gz
+checkpoint
