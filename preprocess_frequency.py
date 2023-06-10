@@ -6,29 +6,11 @@ train = pd.read_csv("./train.csv")[['target', 'comment_text']][:10000]
 train['toxic'] = 1 * (train['target'] > 0.5)
 # test = pd.read_csv("./test.csv")[['comment_text']]
 
-unique_words = set()
-
-stopWords = set(stopwords.words('english'))
-
-ex = (train['comment_text'][0]).lower()
-ex = remove_punct(ex)
-ex = remove_shorts(ex)
-words = word_tokenize(ex)
-words = remove_stopwords(stopwords, words)
-
-words
-
 from tqdm import tqdm
 
 all_words = set()
 for text in tqdm(train['comment_text']):
-    all_words = all_words.union(proc(stopwords, text, [1, 2]))
-
-len(all_words)
-import seaborn as sns
-import matplotlib.pyplot as plt
-sns.histplot(train['target'][:2000])
-plt.savefig('tmp/aaa.png')
+    all_words = all_words.union(proc(text, [1, 2]))
 
 # P(T | C) != P(!T | C)
 #
@@ -43,7 +25,7 @@ plt.savefig('tmp/aaa.png')
 
 s = dict()
 for text, tox in tqdm(zip(train['comment_text'], train['toxic'])):
-    words = proc(stopwords, text, [1, 2])
+    words = proc(text, [1, 2])
     for word in words:
         if word not in s:
             s[word] = [0, 0]
@@ -76,8 +58,13 @@ for word in s:
 
 
 
-len(sig_list_sorted[:10])
 sig_list_sorted = sorted(sig_list, key=lambda x: -abs(x[1]))
+sig_list_sorted_pos = sorted(list(filter(lambda x: x[1] > 0, sig_list)), key=lambda x: -abs(x[1]))
+
+keywords = list(map(lambda x: x[0], sig_list_sorted[:150]))
+f = open("freq_keywords", "wt")
+f.write(",".join(keywords))
+f.close()
 
 sorted(sig_list, key=lambda x: -x[1])
 
