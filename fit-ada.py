@@ -2,6 +2,7 @@ from rnn import Encoder
 from preprocess import proc
 import tensorflow as tf
 from tqdm import tqdm
+import pandas as pd
 
 encoder = Encoder(300, 300, 100, 1)
 encoder.load_weights("encoder.weights")
@@ -12,7 +13,10 @@ for i in tqdm(range(100000)):
     line = f.readline()
     els = line.split()
     token = els[0]
-    value = tf.convert_to_tensor(list(map(float, els[1:])), dtype=tf.float32)
+    try:
+        value = tf.convert_to_tensor(list(map(float, els[1:])), dtype=tf.float32)
+    except:
+        break
     w2v_dict[token] = value
 f.close()
 
@@ -36,9 +40,23 @@ def comment_text_to_vec(comment_text):
 train = pd.read_csv("./train.csv")[['target', 'comment_text']][:10000]
 train['toxic'] = 1 * (train['target'] > 0.5)
 
+print("Training")
 X, y = [], []
-for Xrow, yrow in tqdm(zip(train['comment_text'], train["toxic"])):
+for Xrow, yrow in tqdm(list(zip(train['comment_text'], train["toxic"]))[:5000]):
     v = comment_text_to_vec(Xrow)
     if v is not None:
         X.append(v)
         y.append(yrow)
+
+import numpy as np
+X = np.stack(X)
+y = np.array(y)
+
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y)
+m = AdaBoostClassifier()
+m.fit(X_train, y_train)
+print("Train error:", m.score(X_train, y_train))
+print("Test error:", m.score(X_test, y_test))
