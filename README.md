@@ -30,5 +30,4 @@ Table with scores for different models
 | Model        | Train  | Test   |
 |--------------|--------|--------|
 | Freq SVM     | 0.9766 | 0.9568 |
-| RNN AdaBoost |        |        |
-
+| RNN AdaBoost | 0.9694 | 0.9614 |
