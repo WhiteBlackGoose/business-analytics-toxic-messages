@@ -1,0 +1,81 @@
+\documentclass{beamer}
+
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{listings}
+\graphicspath{ {./pics/} }
+
+\title{Toxic Message Detection}
+\subtitle{Machine learning}
+\date{2023-06-13}
+\institute{HSE University}
+
+\usetheme{Boadilla}
+\begin{document}
+  \frame {
+    \titlepage
+  }
+  \frame {
+    \frametitle{Primary preprocessing}
+\begin{itemize}
+\item Tokenize
+\item Drop stop words
+\end{itemize}
+(file: preprocess.py)
+  }
+  \frame {
+    \frametitle{Frequency preprocessing: Bayesian analysis}
+\begin{block}{}
+  \begin{center}
+  \vspace{5pt}
+  How many times is this word encounted in toxic and regular messages?
+  \vspace{5pt}
+  \end{center}
+\end{block}
+\begin{block}{}
+  \begin{center}
+  \vspace{5pt}
+  $\implies$ how much does the given word affect the probability, that the message is toxic?
+  \vspace{5pt}
+  \end{center}
+\end{block}
+\begin{block}{}
+  \begin{center}
+  \vspace{5pt}
+    Frequency dictionary contains 150 words with the highest effect
+  \vspace{5pt}
+  \end{center}
+\end{block}
+  }
+  \frame {
+    \frametitle{Frequency preprocessing: formula}
+\begin{itemize}
+  \item $T$ - total number of toxic messages
+  \item $t$ - number of times this word appears in toxic messages
+  \item $T^c$ and $t^c$ are their respective complements
+\end{itemize}
+\begin{block}{}
+  \begin{center}
+\[
+effect = \left(\frac{t^c}{T^c}-\frac{t}{T}\right)\frac{T+T^c}{t+t^c}
+\]
+  \vspace{5pt}
+  \end{center}
+\end{block}
+(file: preprocess\_frequency.py)
+  }
+  \frame {
+    \frametitle{RNN Preprocessing: Training}
+\begin{itemize}
+  \item Supply encoder initial state and, sequentially, input tokens
+  \item Obtain the final state
+  \item Check every decoder's output against the expected input
+  \item Update weights
+\end{itemize}
+  }
+  \frame {
+    \frametitle{Fit models: Frequency Dictionary}
+
+  }
+\end{document}
