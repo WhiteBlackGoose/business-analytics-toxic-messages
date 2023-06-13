@@ -66,6 +66,14 @@ effect = \left(\frac{t^c}{T^c}-\frac{t}{T}\right)\frac{T+T^c}{t+t^c}
 (file: preprocess\_frequency.py)
   }
   \frame {
+    \frametitle{RNN Preprocessing: Words}
+\begin{itemize}
+  \item glove.840B.300d words semantic database
+  \item Turn each tweet into a list of vectors of length 300
+\end{itemize}
+(file: preprocess\_rnn.py)
+  }
+  \frame {
     \frametitle{RNN Preprocessing: Training}
 \begin{itemize}
   \item Supply encoder initial state and, sequentially, input tokens
@@ -73,9 +81,31 @@ effect = \left(\frac{t^c}{T^c}-\frac{t}{T}\right)\frac{T+T^c}{t+t^c}
   \item Check every decoder's output against the expected input
   \item Update weights
 \end{itemize}
+The output is a 100d vector.
+(file: preprocess\_rnn.py, rnn.py)
   }
   \frame {
     \frametitle{Fit models: Frequency Dictionary}
-
+\begin{itemize}
+  \item Input: vector of 150 floats. Each float represents how many the given message contains words from the 150 most influential words. 
+  \item Output: class 0 or 1
+\end{itemize}
+  }
+  \frame {
+    \frametitle{Fit models: RNN}
+\begin{itemize}
+  \item Input: vector of 100 floats, which correspond to the semantics of the message
+  \item Output: class 0 or 1
+\end{itemize}
+  }
+  \frame {
+    \frametitle{Models fitting and comparison}
+\begin{center}
+\begin{tabular}{lll}
+Model        & Train error & Test error\\
+Freq SVM     & 0.9766      & 0.9568    \\
+RNN AdaBoost & 0.9694      & 0.9614    \\
+\end{tabular}
+\end{center}
   }
 \end{document}
