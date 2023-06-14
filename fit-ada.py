@@ -3,6 +3,7 @@ from preprocess import proc
 import tensorflow as tf
 from tqdm import tqdm
 import pandas as pd
+from sklearn.metrics import f1_score
 
 encoder = Encoder(300, 300, 100, 1)
 encoder.load_weights("encoder.weights")
@@ -42,7 +43,7 @@ train['toxic'] = 1 * (train['target'] > 0.5)
 
 print("Training")
 X, y = [], []
-for Xrow, yrow in tqdm(list(zip(train['comment_text'], train["toxic"]))[:5000]):
+for Xrow, yrow in tqdm(list(zip(train['comment_text'], train["toxic"]))[:50]):
     v = comment_text_to_vec(Xrow)
     if v is not None:
         X.append(v)
@@ -58,5 +59,7 @@ from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X, y)
 m = AdaBoostClassifier()
 m.fit(X_train, y_train)
-print("Train error:", m.score(X_train, y_train))
-print("Test error:", m.score(X_test, y_test))
+print("Train accuracy:", m.score(X_train, y_train))
+print("Test accuracy:", m.score(X_test, y_test))
+print("Train f1:", f1_score(y_train, m.predict(X_train)))
+print("Test f1:", f1_score(y_test, m.predict(X_test)))

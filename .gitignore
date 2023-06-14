@@ -12,6 +12,11 @@ toxicity_individual_annotations.csv
 train.csv
 glove_10k_300d.txt.gz
 checkpoint
+
 /.ipynb_checkpoints/
 /glove_10k_300d.txt
 /.idea/
+
+presentation/.out/*
+!presentation/.out/**.pdf
+
