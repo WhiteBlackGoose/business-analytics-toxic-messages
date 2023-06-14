@@ -27,7 +27,8 @@ File ``
 
 Table with scores for different models
 
-| Model        | Train  | Test   |
-|--------------|--------|--------|
-| Freq SVM     | 0.9766 | 0.9568 |
-| RNN AdaBoost | 0.9694 | 0.9614 |
+| Model             | Train Acc | Test Acc | Train F_1 | Test F_1 |
+|-------------------|-----------|----------|-----------|----------|
+| Freq SVM          | 0.9766    | 0.9568   | --        | --       |
+| Freq SVM Balanced | 0.6919    | 0.6767   | 0.5939    | 0.5765   |
+| RNN AdaBoost      | 0.9694    | 0.9614   | --        | --       |
