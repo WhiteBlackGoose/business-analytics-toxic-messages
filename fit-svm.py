@@ -1,5 +1,6 @@
 from preprocess import proc
 import freq
+import pandas as pd
 from freq import read_kw, word_list2freq_dict
 from importlib import reload
 reload(freq)

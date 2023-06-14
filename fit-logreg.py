@@ -37,6 +37,15 @@ def comment_text_to_vec(comment_text):
     return enc_hidden[0].numpy()
 
 
+def cross_validation(model, X, y, scorer, cv=5):
+    return cross_validate(estimator=model,
+                          X=X,
+                          y=y,
+                          cv=cv,
+                          scoring=scorer,
+                          return_train_score=True)
+
+
 train = pd.read_csv("./train.csv")[['target', 'comment_text']][:10000]
 train['toxic'] = 1 * (train['target'] > 0.5)
 
@@ -52,11 +61,25 @@ import numpy as np
 X = np.stack(X)
 y = np.array(y)
 
-from sklearn.ensemble import AdaBoostClassifier
-from sklearn.model_selection import train_test_split
 
-X_train, X_test, y_train, y_test = train_test_split(X, y)
-m = AdaBoostClassifier()
-m.fit(X_train, y_train)
-print("Train error:", m.score(X_train, y_train))
-print("Test error:", m.score(X_test, y_test))
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import cross_validate
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+Xs = scaler.fit_transform(X)
+
+best = 0
+pen_best = 0
+inter_best = 0
+for penalty in ('l1', 'l2', 'elasticnet', 'none'):
+    for intercept in (True, False):
+        m = LogisticRegression(penalty = penalty, fit_intercept = intercept)
+        res = cross_validation(m, Xs, y, ['f1'], 5)
+        if res['test_f1'].mean() > best:
+            best = res['test_f1'].mean()
+            pen_best = penalty
+            inter_best = intercept
+
+print(best, pen_best, inter_best)

@@ -1,6 +1,9 @@
+import nltk
+nltk.download('stopwords')
+nltk.download('punkt')
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords
-import nltk
+
 
 def remove_punct(text):
     import string
