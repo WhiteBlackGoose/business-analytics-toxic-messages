@@ -14,3 +14,4 @@ glove_10k_300d.txt.gz
 checkpoint
 /.ipynb_checkpoints/
 /glove_10k_300d.txt
+/.idea/
