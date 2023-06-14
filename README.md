@@ -32,3 +32,5 @@ Table with scores for different models
 | Freq SVM          | 0.9766    | 0.9568   | --        | --       |
 | Freq SVM Balanced | 0.6919    | 0.6767   | 0.5939    | 0.5765   |
 | RNN AdaBoost      | 0.9694    | 0.9614   | --        | --       |
+| Freq LDA Balanced | 0.7930    | 0.7393   | --        | 0.671    |
+| RNN Random Forest | 0.9863    | 0.6      | --        | 0.444    |
