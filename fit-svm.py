@@ -8,7 +8,7 @@ import pandas as pd
 
 kw = read_kw()
 
-balanced = True
+balanced = False
 
 if balanced:
     train = pd.read_csv("./train.csv")[['target', 'comment_text']]
