@@ -29,9 +29,7 @@
 *** Ilya: cross-validation
     + CV
     + Grid search
-    + balanced   n = 5
     + unbalanced n = 3, weights uniform
-    + Logreg: penalty L2
 ** 3 min
 *** Egor: final overview
     + Unbalanced: 3 RNNs and 3 freq
