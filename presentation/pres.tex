@@ -11,6 +11,16 @@
 \date{2023-06-13}
 \institute{HSE University}
 
+\newcommand{\blc}[1]{
+\begin{block}{}
+  \begin{center}
+    \vspace{5pt}
+      #1
+    \vspace{5pt}
+  \end{center}
+\end{block}
+}
+
 \usetheme{Boadilla}
 \begin{document}
   \frame {
@@ -19,6 +29,7 @@
   \frame {
     \frametitle{Primary preprocessing}
 \begin{itemize}
+\item Toxic threshold
 \item Tokenize
 \item Drop stop words
 \end{itemize}
@@ -85,6 +96,12 @@ The output is a 100d vector.
 (file: preprocess\_rnn.py, rnn.py)
   }
   \frame {
+    \frametitle{Unbalanced data problem}
+\blc{Problem: data is unbalanced, $\approx 5\%$ of toxic messages}
+\blc{Solution 1: $F_1=\frac{2}{\frac{1}{prec}+\frac{1}{recall}}=\frac{TP}{TP+\frac{1}{2}\left(FP+FN\right)}$}
+\blc{Solution 2: Balance data}
+  }
+  \frame {
     \frametitle{Fit models: Frequency Dictionary}
 \begin{itemize}
   \item Input: vector of 150 floats. Each float represents how many the given message contains words from the 150 most influential words. 
@@ -103,15 +120,15 @@ The output is a 100d vector.
 \begin{center}
 \begin{tabular}{lcccc}
 Model             & Train Acc & Test Acc & Train $f_1$ & Test $f_1$\\
-Freq SVM           & 0.9766    & 0.9568   & 0.4392    & 0.2447   \\
 RNN AdaBoost       & 0.9694    & 0.9614   & --        & --       \\
-Freq LDA           & --        & --       & --        & 0.2400   \\
 RNN Random Forest  & 0.9863    & 0.6000   & --        & 0.4440   \\
-Freq KNN           & 0.9450    & 0.9434   & 0.3460    & 0.3090   \\
 RNN Log Regression & 0.9700    & 0.9270   & --        & --       \\
-Freq KNN Balanced  & 0.5270    & 0.5220   & 0.6590    & 0.6550   \\
+Freq SVM           & 0.9766    & 0.9568   & 0.4392    & 0.2447   \\
+Freq LDA           & --        & --       & --        & 0.2400   \\
+Freq KNN           & 0.9450    & 0.9434   & 0.3460    & 0.3090   \\
 Freq SVM Balanced  & 0.6919    & 0.6767   & 0.5939    & 0.5765   \\
 Freq LDA Balanced  & 0.7930    & 0.7393   & --        & 0.6710   \\
+Freq KNN Balanced  & 0.5270    & 0.5220   & 0.6590    & 0.6550   \\
 \end{tabular}
 \end{center}
   }
