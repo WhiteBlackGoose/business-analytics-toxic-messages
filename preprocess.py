@@ -29,6 +29,11 @@ def remove_stopwords(words):
             wordsFiltered.append(w)
     return wordsFiltered
 
+# text - is a raw tweet's text
+# ns - an interable of n
+# the output - is all n-grams for all n in ns
+# for example, proc("hello world 123", [1, 2]) would return
+# ["hello", "world", "123", "hello world", "world 123"]
 def proc(text, ns):
     text = text.lower()
     text = remove_punct(text)

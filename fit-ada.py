@@ -8,6 +8,8 @@ from sklearn.metrics import f1_score
 encoder = Encoder(300, 300, 100, 1)
 encoder.load_weights("encoder.weights")
 
+# Collect all words into dictionary
+# to quickly fetch a vector given word
 w2v_dict = dict()
 f = open("./glove.840B.300d.txt", "rt", encoding='utf-8')
 for i in tqdm(range(100000)):
@@ -21,6 +23,7 @@ for i in tqdm(range(100000)):
     w2v_dict[token] = value
 f.close()
 
+# Runs encoder on a commext text
 def comment_text_to_vec(comment_text):
     p = proc(comment_text, [1, 2])
     tweet = []

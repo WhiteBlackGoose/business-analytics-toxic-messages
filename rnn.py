@@ -5,6 +5,7 @@ import numpy as np
 # https://towardsdatascience.com/sequence-to-sequence-models-from-rnn-to-transformers-e24097069639
 loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none')
 
+# Encoder turns a sequence of vectors into one
 class Encoder(tf.keras.Model):
     def __init__(self, vocab_size, embedding_dim, enc_units, batch_sz):
         '''
@@ -28,6 +29,7 @@ class Encoder(tf.keras.Model):
     def initialize_hidden_state(self):
         return tf.zeros((self.batch_sz, self.enc_units))
 
+# Decoder turns one vector into a sequence
 class Decoder(tf.keras.Model):
     def __init__(self, vocab_size, embedding_dim, dec_units, batch_sz):
         super(Decoder, self).__init__()
@@ -55,20 +57,19 @@ class Decoder(tf.keras.Model):
         return output, state
 
 
-#def loss_function(real, pred):
-#    mse = tf.keras.losses.MeanSquaredError()
-#    return mse(real, pred)
 loss_function = tf.keras.losses.MeanSquaredError()
 
 
 @tf.function
 def train_step(tweet, encoder, decoder, enc_hidden):
+    # First: encode a tweet
     tweet = tf.stack(tweet)
     tweet = tf.expand_dims(tweet, axis=1)
     tweet = tf.expand_dims(tweet, axis=3)
     for word in tweet:
         out_t, enc_hidden = encoder(word, enc_hidden)
 
+    # Having enc_hidden, we decode it back
     loss = 0.0
     dec_input = tf.ones(word.shape)
     for word in tweet:
@@ -76,5 +77,6 @@ def train_step(tweet, encoder, decoder, enc_hidden):
         dec_input = tf.reshape(dec_input, (100, 300))[0]
         dec_input = tf.reshape(dec_input, word.shape)
         
+        # Then we compare the produced output with the input
         loss += loss_function(dec_input, word)
     return loss

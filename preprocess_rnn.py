@@ -49,6 +49,7 @@ decoder = Decoder(300, 300, 100, BATCH_SIZE)
 
 EPOCHS = 100
 
+# Run this to train
 def train_epoch():
     start = time.time()
 
@@ -58,6 +59,7 @@ def train_epoch():
     variables = encoder.trainable_variables + decoder.trainable_variables
     thing = tqdm(enumerate(vecs))
     for (batch_id, (tox, words)) in thing:
+        # ignore empty tweets
         if not len(words):
             continue
         with tf.GradientTape() as tape:
