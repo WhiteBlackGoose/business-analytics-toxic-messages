@@ -7,7 +7,7 @@ import numpy as np
 from sklearn.metrics import fbeta_score
 reload(freq)
 
-
+# function for performing cross-validation
 def cross_validation(model, X, y, scorer, cv=5):
     return cross_validate(estimator=model,
                           X=X,
@@ -17,18 +17,14 @@ def cross_validation(model, X, y, scorer, cv=5):
                           return_train_score=True)
 
 
-def scor(y, y_pred):
-    t_pt = [i * j for i in y for j in y_pred]
-    f_pf = [(1 - i) * (1 - j) for i in y for j in y_pred]
-    return sum(t_pt) * sum(f_pf) / (sum(y_pred) * (len(y_pred) - sum(y_pred)))
-
-
+# get keywords
 kw = read_kw()
 
+# load train data
 train = pd.read_csv("./train.csv")[['target', 'comment_text']][:20000]
 train['toxic'] = 1 * (train['target'] > 0.5)
 
-
+# transform input to vector
 def comment_text_to_vec(comment_text):
     p = proc(comment_text, [1, 2])
     return word_list2freq_dict(kw, p)
@@ -44,6 +40,7 @@ from sklearn.neighbors import KNeighborsClassifier
 X = np.stack(train["comment"])
 y = train["toxic"]
 
+# gridsearch + crossvalidation for choosing optimal hyperparameters
 best = 0
 k_best = 0
 weight_best = 0

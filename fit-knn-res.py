@@ -8,28 +8,16 @@ from sklearn.metrics import fbeta_score
 reload(freq)
 
 
-def cross_validation(model, X, y, scorer, cv=5):
-    return cross_validate(estimator=model,
-                          X=X,
-                          y=y,
-                          cv=cv,
-                          scoring=scorer,
-                          return_train_score=True)
-
-
-def scor(y, y_pred):
-    t_pt = [i * j for i in y for j in y_pred]
-    f_pf = [(1 - i) * (1 - j) for i in y for j in y_pred]
-    return sum(t_pt) * sum(f_pf) / (sum(y_pred) * (len(y_pred) - sum(y_pred)))
-
-
+# read keywords
 kw = read_kw()
 
+# load input
 train = pd.read_csv("./train.csv")[['target', 'comment_text']][:200000]
 test = pd.read_csv("./test.csv")[['comment_text']]
 train['toxic'] = 1 * (train['target'] > 0.5)
 
 
+# transform input comments to vectors
 def comment_text_to_vec(comment_text):
     p = proc(comment_text, [1, 2])
     return word_list2freq_dict(kw, p)
@@ -43,16 +31,19 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import f1_score
 from sklearn.preprocessing import StandardScaler
 
+# split into train and test samples
 X_train, X_test, y_train, y_test = train_test_split(train["comment"], train["toxic"])
 
 X_train = np.stack(X_train)
 X_test = np.stack(X_test)
+
+# scale data
 scaler = StandardScaler()
 
 Xs_train = scaler.fit_transform(X_train)
 Xs_test = scaler.transform(X_test)
 
-m = KNeighborsClassifier(n_neighbors=5, weights='distance')
+m = KNeighborsClassifier(n_neighbors=3, weights='uniform')
 m.fit(Xs_train, y_train)
 pred = m.predict(Xs_test)
 pred_train = m.predict(Xs_train)

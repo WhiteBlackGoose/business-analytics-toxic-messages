@@ -3,10 +3,14 @@ from preprocess import proc
 import tensorflow as tf
 from tqdm import tqdm
 import pandas as pd
+#this is older version of file, all components were later moved into logreg.ipynb
 
+
+# load pretrained RNN
 encoder = Encoder(300, 300, 100, 1)
 encoder.load_weights("encoder.weights")
 
+# w2v
 w2v_dict = dict()
 f = open("./glove.840B.300d.txt", "rt", encoding='utf-8')
 for i in tqdm(range(100000)):
@@ -20,6 +24,7 @@ for i in tqdm(range(100000)):
     w2v_dict[token] = value
 f.close()
 
+# transofrm comments to vector function
 def comment_text_to_vec(comment_text):
     p = proc(comment_text, [1, 2])
     tweet = []
@@ -45,10 +50,11 @@ def cross_validation(model, X, y, scorer, cv=5):
                           scoring=scorer,
                           return_train_score=True)
 
-
+# read input
 train = pd.read_csv("./train.csv")[['target', 'comment_text']][:10000]
 train['toxic'] = 1 * (train['target'] > 0.5)
 
+#transform input to vector
 print("Training")
 X, y = [], []
 for Xrow, yrow in tqdm(list(zip(train['comment_text'], train["toxic"]))[:5000]):
@@ -67,9 +73,11 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_validate
 from sklearn.preprocessing import StandardScaler
 
+# scale data
 scaler = StandardScaler()
 Xs = scaler.fit_transform(X)
 
+# gridsearch and cross-validation for choosing hyperparameters
 best = 0
 pen_best = 0
 inter_best = 0
