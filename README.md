@@ -1,5 +1,7 @@
 # Preprocessing
 
+[_**>> DATASET <<**_](https://www.kaggle.com/competitions/jigsaw-unintended-bias-in-toxicity-classification/data)
+
 ## Tokenization
 
 File `./preprocess.py` exports functions to tokenize a tweet's text into most important n-grams
